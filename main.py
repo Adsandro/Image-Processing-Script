@@ -2,33 +2,41 @@ from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
 
-funcionarios = {"Nome":                 ["Adsandro Carvalho", "Adsandro Lucas Martins"],
-                "Data de nascimento":   ["01/12/2002", "23/06/2003"],
-                "Cargo":                ["Desenvolvedor Python", "Database analyst"]
-                }
+nome = 'Nome do contribuinte'
+cargo = 'Cargo'
+data_aniversario = '00/00/0000'
 
-
-nome = (funcionarios["Nome"][1])
-cargo = (funcionarios["Cargo"][1])
-data_aniversario = (funcionarios["Data de nascimento"][1])
-
-image = Image.new('RGB', (1080, 1920), color=(0,0,0,0))
-image.save('./imagesCreated/transparentIMage.png')
-
-template =          Image.open('./pictures/template.jpg')
-transparentImage =  Image.open('./imagesCreated/transparentIMage.png')
+template = Image.open('./template/template.jpg')
+fotoPerfil = Image.open('./pictures/fotoPerfil.jpeg')
+png = Image.open('./imagesCreated/ImagemPNG.png')
+imagemRotacionada = Image.open('./imagesCreated/imagemRotacionada.png')
 
 Drawtemplate = ImageDraw.Draw(template)
+drawPng = ImageDraw.Draw(png)
 
 fontName = ImageFont.truetype('./fonts/BaksoSapi.otf',50)
 fontCargo = ImageFont.truetype('./fonts/BaksoSapi.otf',37)
 
+def createPNG():
+    newTemplate = Image.new("RGBA", (1080, 1920), (0,0,0,0) )
+    return newTemplate.save('./imagesCreated/ImagemPNG.png')
 
-Drawtemplate.text((260,1270), nome, font=fontName)
-Drawtemplate.text((260,1310), cargo, font=fontCargo)
-Drawtemplate.text((700,1150), data_aniversario, font=fontCargo)
+def imageRotated(fotoPerfil, png):
+    png.paste(fotoPerfil, box=(250,600))
+    im_rotated = png.rotate(3)
+    return im_rotated.save('./imagesCreated/imagemRotacionada.png')
+    
+def pastPicture(template, fotoPerfil):
+    template.paste(fotoPerfil, box=(250,600))
+    return template.save('./imagesCreated/fotoColada.jpg')
 
-template.save('./imagesCreated/teste3.jpg')
+def createPicture(nome, cargo, data_aniversario, Drawtemplate, fontName, fontCargo):
+    Drawtemplate.text((260,1270), nome, fill='Black', font=fontName)
+    Drawtemplate.text((260,1310), cargo, fill='Black', font=fontCargo)
+    Drawtemplate.text((700,1150), data_aniversario, fill='Black', font=fontCargo)
+    return template.save('./imagesCreated/TextoColado.jpg')
 
-
-
+createPNG()
+imageRotated(fotoPerfil, png)
+pastPicture(template, fotoPerfil)
+createPicture(nome, cargo, data_aniversario, Drawtemplate, fontName, fontCargo)
