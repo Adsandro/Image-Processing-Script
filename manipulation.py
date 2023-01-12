@@ -7,7 +7,7 @@ from PIL import ImageFont
 # largura de 600px para encaixar no template selecionado.
 def calcNewHeight(newWidth, profilePicture):
     width, height = profilePicture.size
-    newHeight = round((newWidth * height) / width)
+    newHeight = round((newWidth * height) / width)+30
     return newHeight
 
 # Em conjunto com a calcNewHeight, a resizeImage utiliza o calculo realizado
@@ -43,7 +43,7 @@ if __name__ == "__main__":
     data_aniversario = '00/00/0000'
 
     template = Image.open('./template/template.jpg')
-    profilePicture = Image.open('./pictures/profilePicture.jpeg')
+    profilePicture = Image.open('./pictures/mypicture.jpg')
 
     resizeImage(newWidth, profilePicture)
     pictureResized = Image.open(f'./imagesResized/{name}Picture.png')
