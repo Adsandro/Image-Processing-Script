@@ -2,3 +2,4 @@ imagesCreated/
 imagesResized/
 pictures/
 venv/
+*.log
