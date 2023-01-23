@@ -3,3 +3,9 @@ imagesResized/
 pictures/
 venv/
 *.log
+templates
+venv
+pictures
+templates
+__pycache__
+imgs
