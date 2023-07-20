@@ -1,84 +1,71 @@
-from PIL import Image
-from PIL import ImageDraw
-from PIL import ImageFont
-
+from PIL import Image, ImageDraw, ImageFont
 import logging
 
-logging.basicConfig(level=logging.INFO, 
-                    filename='log_automated_action.log', 
-                    format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, filename='log_automated_action.log', format='%(asctime)s - %(levelname)s - %(message)s')
 
-# A função calc_new_height realiza um calculo para definir o melhor tamanho
-# da imagem conforme a largura selecionada, como padrão foi utilizado
-# largura de 600px para encaixar no template selecionado.
-def calc_new_height(newWidth, profilePicture):
+def calc_new_height(new_width, profile_picture):
     try:
-        width, height = profilePicture.size
-        newHeight = round((newWidth * height) / width)
-    except:
-        logging.info('Não foi possivel calcular o novo tamanho da foto de perfil')
-    else:
-        logging.info('Calculo de largura e altura realizado com sucesso!')
-        return newHeight
+        width, height = profile_picture.size
+        new_height = round((new_width * height) / width)
+        logging.info('Calculation of width and height successful!')
+        return new_height
+    except Exception as e:
+        logging.error('Failed to calculate the new profile picture height: %s', str(e))
+        return None
 
-# Em conjunto com a calc_new_height, a resize_image utiliza o calculo realizado
-# e a largura ja definida para redimencionar as imagens selecionadas.
-def resize_image(newWidth, profilePicture):
+def resize_image(new_width, profile_picture):
     try:
-        newHeight = calc_new_height(newWidth, profilePicture)
-        newPicture = profilePicture.resize((newWidth, newHeight), Image.LANCZOS)
-    except:
-        logging.info('Não foi possivel colar a imagem no template')
-    else:
-        logging.info('Imagem redimencionada com sucesso!')
-        return newPicture.save(f'./imagesResized/Nome_do_contribuinte_Picture.png')
+        new_height = calc_new_height(new_width, profile_picture)
+        if new_height:
+            new_picture = profile_picture.resize((new_width, new_height), Image.LANCZOS)
+            new_picture.save(f'./imagesResized/Nome_do_contribuinte_Picture.png')
+            logging.info('Image resized successfully!')
+    except Exception as e:
+        logging.error('Failed to resize the profile picture: %s', str(e))
 
-# A função paste_picture possui como objetivo colar uma imagem em cima da
-# outra, o parametro box trata-se das coordenadas no template.
-def paste_picture(template, profilePicture):
+def paste_picture(template, profile_picture, box_coords):
     try:
-        paste_picture = template.paste(profilePicture, box=(245,890))
-    except:
-        logging.info('Nãofoi possivel colar a imagem no template')
-    else:
-        logging.info('Imagem colada no template com sucesso!')
-        return paste_picture
+        template.paste(profile_picture, box=box_coords)
+        template.save(f'./imagesCreated/Nome_do_contribuinte_Template.jpg')
+        logging.info('Profile picture pasted on template successfully!')
+    except Exception as e:
+        logging.error('Failed to paste the profile picture on the template: %s', str(e))
 
-# No create_birthday_image o pillow estara escrevendo os textos que deseja,
-# as alterações relacionadas a fonte deve ser realizadas nas variaveis
-# que foram declaras como fontName, fontCargo e fontDate, o parametro
-# fill é responsavel pela cor do texto e o parametro restante esta relacionado
-# as coordenadas que serão escritas cada texto.
-def create_birthday_image(name, cargo, data_aniversario, Drawtemplate, fontName, fontCargo):
+def create_birthday_image(name, birth_date, template_path, profile_picture_path, font_name_path, font_date_path, font_size_name=45, font_size_date=33):
     try:
-        Drawtemplate.text((260,1400), name, fill='Black', font=fontName)
-        Drawtemplate.text((630,1470), data_aniversario, fill='Black', font=fontDate)
-    except:
-        logging.info('A operação de criação de imagem falhou')
-    else:
-        logging.info(f'Template de Nome_do_contribuinte criado com sucesso!')
-        return template.save(f'./imagesCreated/Nome_do_contribuinte_Template.jpg')
+        template = Image.open(template_path)
+        profile_picture = Image.open(profile_picture_path)
+
+        new_width = 600
+        resize_image(new_width, profile_picture)
+
+        picture_resized = Image.open(f'./imagesResized/Nome_do_contribuinte_Picture.png')
+        draw_template = ImageDraw.Draw(template)
+
+        font_name = ImageFont.truetype(font_name_path, font_size_name)
+        font_date = ImageFont.truetype(font_date_path, font_size_date)
+
+        draw_template.text((260, 1400), name, fill='Black', font=font_name)
+        draw_template.text((630, 1470), birth_date, fill='Black', font=font_date)
+        template.save(f'./imagesCreated/Nome_do_contribuinte_Template.jpg')
+
+        logging.info('Template for Nome_do_contribuinte created successfully!')
+    except Exception as e:
+        logging.error('Failed to create the birthday image: %s', str(e))
     finally:
-        print('Programa finalizado!')
+        print('Finally!')
 
-if __name__ == "__main__":
-
-    newWidth = 600
-
+def main():
     name = 'Nome_do_contribuinte'
     cargo = 'Cargo'
     data_aniversario = '00/00/0000'
 
-    template = Image.open('./template/template.png')
-    profilePicture = Image.open('./pictures/profilePicture.jpeg')
+    font_name_path = './fonts/BaksoSapi.otf'
+    font_date_path = './fonts/BaksoSapi.otf'
+    template_path = './template/template.png'
+    profile_picture_path = './pictures/profilePicture.jpeg'
 
-    resize_image(newWidth, profilePicture)
-    pictureResized = Image.open(f'./imagesResized/Nome_do_contribuinte_Picture.png')
-    Drawtemplate = ImageDraw.Draw(template)
+    create_birthday_image(name, data_aniversario, template_path, profile_picture_path, font_name_path, font_date_path)
 
-    fontName = ImageFont.truetype('./fonts/BaksoSapi.otf',45)
-    fontOffice = ImageFont.truetype('./fonts/BaksoSapi.otf',27)
-    fontDate = ImageFont.truetype('./fonts/BaksoSapi.otf',33)
-    
-    paste_picture(template, pictureResized)
-    create_birthday_image(name, cargo, data_aniversario, Drawtemplate, fontName, fontOffice)
+if __name__ == "__main__":
+    main()
